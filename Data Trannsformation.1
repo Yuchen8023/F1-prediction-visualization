@@ -1,0 +1,70 @@
+#----------------------Data Visaulization-------------------------------------------
+
+library(dplyr)
+###-------------------------join drivers names and race details-------------------
+# Joining the tables
+df_joined <- df %>%
+  left_join(df_drivers %>% select(driverId, forename, surname, dob, nationality, url), by = "driverId")
+
+#combine surname and forename 
+df_joined$driverName <- paste(df_joined$forename, df_joined$surname, sep = " ")
+
+#drop unnecessary columns (forename and surname)
+df_joined <- df_joined %>%
+  select(-c(forename, surname))
+
+# Create the 'racename' column by pasting 'name' and 'year' columns together
+df_races$racename <- with(df_races, paste(name, year))
+
+# Select only the necessary columns from 'races' before merging
+races_subset <- df_races[, c('raceId', 'round', 'racename', 'date', 'url')]
+
+# Rename the 'url' column to 'race_url' for clarity
+names(races_subset)[names(races_subset) == "url"] <- "race_url"
+
+# Merge 'df_joined' with the subset of 'races' on 'raceId'
+df_joined <- df_joined %>%
+  left_join(races_subset, by = "raceId")
+
+###-------- add average lap time---------------------------------
+# Rename columns in lapTimes
+lapTimes <- lapTimes %>%
+  rename(
+    lap_time = time,
+    lap_milliseconds = milliseconds
+  )
+
+# Group by raceId and driverId, then summarize
+grouped_lapTime <- lapTimes %>%
+  group_by(raceId, driverId) %>%
+  summarise(
+    avg_lap_milliseconds = mean(lap_milliseconds, na.rm = TRUE)
+  ) %>%
+  ungroup() # Remember to ungroup to avoid carrying the grouping structure forward
+
+# Left join df_joined with grouped_lapTime
+df_joined <- df_joined %>%
+  left_join(select(grouped_lapTime, raceId, driverId, avg_lap_milliseconds), by = c("raceId", "driverId"))
+
+#----------------add pit stops------------------------------------------------ 
+
+# Assuming pitStops$duration needs to be converted from a string to seconds
+grouped_pitStops <- pitStops %>%
+  mutate(
+    duration_seconds = milliseconds/1000
+  ) %>%
+  group_by(driverId, raceId) %>%
+  summarise(
+    total_stops = n(),
+    average_stop_duration_in_seconds = mean(duration_seconds, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+
+# Join df_joined with grouped_pitStops
+df_joined <- df_joined %>%
+  left_join(grouped_pitStops, by = c("driverId", "raceId"))
+
+df_joined <- df_joined %>%
+  mutate(average_stop_duration_in_seconds = ifelse(is.na(average_stop_duration_in_seconds), 0, average_stop_duration_in_seconds)) %>%
+  mutate(total_stops = ifelse(is.na(total_stops), 0, total_stops))
