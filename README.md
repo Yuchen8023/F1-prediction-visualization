@@ -38,3 +38,27 @@ year started: The first year a driver participated in F1 races.
 meanPace and maxPace: The average and maximum pace of a driver during the qualifying rounds. 
 grid_penalty: A binary feature indicating whether a driver had a grid penalty. 
 is_top_5: A binary target variable for modelling, indicating whether a driver finished in the top 5.
+
+Predictive Modeling
+A machine learning model was developed to predict whether a driver would finish in the top 5 based on qualifying results. The features used for this prediction include driver ID, years of experience, qualifying result position, mean and max pace, and whether there was a grid penalty.
+ 
+Interactive Components
+F1 Circuit Winners Map
+An interactive map displays the various circuits where F1 races have taken place. Users can interact with the map to discover information about each circuit, including its name, location, and country.
+Historical Data Analysis
+Graphical visualisations provide insights into the historical data, such as the number of races held each year and the distribution of wins among teams.
+Race Outcome Predictions
+The dashboard allows users to input race-related parameters to predict the outcome of races, providing insights into which drivers are likely to finish in the top 5 based on various performance metrics.
+Visualisations
+Several types of visualisations are included:
+Bar charts: Display the number of races per year with an option to highlight recent years in a different colour.
+Line charts: Show constructors' championship points over the years.
+Heatmaps: Visualize wins by drivers and circuits.
+Pie charts: Represent race wins by teams.
+ 
+Usage
+The dashboard is designed with user interactivity in mind. Users can select different years, drivers, and other parameters to filter the data and interact with the visualisations.
+ 
+Technical Implementation
+The dashboard is built using R and the Shiny web application framework. The tidyverse collection of R packages is extensively used for data manipulation and visualisation, along with other packages such as plotly for interactive plots, leaflet for mapping, and shinydashboard for the dashboard layout.
+
