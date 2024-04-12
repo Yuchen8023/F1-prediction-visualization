@@ -559,7 +559,6 @@ print(avg_xgboost_metrics)
 #step1: extract the workflow with best hyperparameters from random forest
 best_dt_workflow <- finalize_workflow(dectree_workflow, best_dt)
 
-
 #Step 2: With this best model object we can finalize the workflow (using the best hyperparameters)
 # and fit over the split with last_fit()
 final_fit <- best_dt_workflow %>%
@@ -570,9 +569,10 @@ final_fit <- best_dt_workflow %>%
 final_fit_metrics<- collect_metrics(final_fit)
 final_fit_metrics
 
-#save the workflow 
-trained_workflow <- final_fit$.workflow[[1]]
-save(trained_workflow, file = './DATA/trained_workflow.RData')
+#fit the model then save the model for using in shiny
+fitted_workflow <- best_dt_workflow%>%
+  fit(data = race_train)
+saveRDS(fitted_workflow, file = './DATA/fitted_workflow.RDS')
 
 ##-------------------check for overfitting------------------------
 #step 4: check for overfitting with the test data with accuracy 
@@ -596,20 +596,3 @@ print(test_acc)
 ##----------------------Predictions-------------------------------------
 
 #is in shiny 
-
-
-#----------------------Data Visaulization-------------------------------------------
-
-##----------------------1. extract a list of current drivers--------------------------
-library(dplyr)
-
-# Joining the tables
-df_joined <- df_results %>%
-  left_join(df_drivers %>% select(driverId, forename, surname, dob, nationality, url), by = "driverId")
-
-#combine surname and forename 
-df_joined$driverName <- paste(df_joined$forename, df_joined$surname, sep = " ")
-
-#drop unnecessary columns (forename and surname)
-df_joined <- df_joined %>%
-  select(-c(forename, surname))
