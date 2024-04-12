@@ -68,3 +68,25 @@ df_joined <- df_joined %>%
 df_joined <- df_joined %>%
   mutate(average_stop_duration_in_seconds = ifelse(is.na(average_stop_duration_in_seconds), 0, average_stop_duration_in_seconds)) %>%
   mutate(total_stops = ifelse(is.na(total_stops), 0, total_stops))
+
+
+library(readr)
+library(dplyr)
+
+# Load the data
+constructors <- read_csv("./Data/constructors.csv")
+results <- read_csv("./Data/results.csv")
+races <- read_csv("./Data/races.csv")  # Assuming races data contains year information
+
+# Preprocess and summarize race wins for the specified years
+race_wins <- results %>%
+  left_join(races, by = "raceId") %>%
+  filter(positionOrder == 1, year >= 2018, year <= 2022) %>%
+  group_by(constructorId) %>%
+  summarise(wins = n(), .groups = 'drop') %>%
+  left_join(constructors, by = "constructorId") %>%
+  select(name, wins)
+
+# Save the processed data
+write_csv(race_wins, "./Data/race_wins.csv")
+
